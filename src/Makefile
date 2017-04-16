@@ -1,5 +1,4 @@
-CC1 = g++
-CC2 = clang++
+CC = g++
 CCFLAGS = -Wall -std=c++11
 EXEC_NAME = main
 UNAME_S = $(shell uname -s)
@@ -12,25 +11,14 @@ OBJ = ${SRC:.cpp=.o}
 
 ifeq ($(UNAME_S),Darwin)
   CCFLAGS += -stdlib=libc++
+	CC = clang++
 endif
 
 all: ${OBJ}
-ifeq ($(UNAME_S),Darwin)
-	$(CC2) $(CCFLAGS) -o ${EXEC_NAME} ${OBJ}
-else
-ifeq ($(UNAME_S),Linux)
-	$(CC1) $(CCFLAGS) -o ${EXEC_NAME} ${OBJ}
-endif
-endif
+	$(CC) $(CCFLAGS) -o ${EXEC_NAME} ${OBJ}
 
 %.o: %.cpp
-ifeq ($(UNAME_S),Darwin)
-	$(CC2) $(CCFLAGS) -c -o $@ $+
-else
-ifeq ($(UNAME_S),Linux)
-	$(CC1) $(CCFLAGS) -c -o $@ $+
-endif
-endif
+	$(CC) $(CCFLAGS) -c -o $@ $+
 
 clean:
 	rm ${EXEC_NAME} *.o
