@@ -17,6 +17,7 @@ set<string> myset;
 
 int main() {
   trie t;
+
   t.insert("joao");
   t.insert("vanda");
   t.insert("ana");
@@ -24,7 +25,22 @@ int main() {
   t.insert("anaconda");
   t.insert("antigo");
   t.insert("rui");
-  //t.debug();
+  vector<string> words = t.allWords();
+
+  cout << t.size() << endl;
+  for(auto& word : words) {
+    cout << word << " is in our trie." << endl;
+  }
+
+  t.erase("anaconda");
+
+  words = t.allWords();
+
+  cout << "After erasing anaconda:" << endl;
+  cout << t.size() << endl;
+  for(auto& word : words) {
+    cout << word << " is in our trie." << endl;
+  }
 
   return 0;
 }

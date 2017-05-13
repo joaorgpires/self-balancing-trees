@@ -20,6 +20,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -29,14 +30,19 @@ public:
   trie();
   size_t size();
   void insert(string s2add); // Name is self explanatory
+  bool find(string s2find); // Chekcs if s2find is a word in our trie
   void erase(string s2rem); // Name is self explanatory
   bool occurs(string pref); // Checks if pref is a prefix of any word in trie
   vector<string> allWords(); // Returns a vector with all the words present in the trie, lexicographicaly ordered
-  string lcp(); // Longest common prefix
+  string lcp(string beg); // Longest common prefix from beg (if beg == "", lcp in trie)
   void debug(); // Just for debugging
 
 private:
   struct TrieNode;
+
+  // Variables
+  TrieNode *root; // Root of this trie
+  size_t n_words; // Number of words in this trie
 
   // Struct that defines each node in my trie
   struct TrieNode {
@@ -45,17 +51,13 @@ private:
     int nchild; // Number of child nodes of current node
     bool isLeaf; // If a word ends in this node, this is set to true
 
-    TrieNode *child[26]; // The child nodes for a node are 26, 1 for each letter in the alphabet
+    TrieNode *child[26]; // The number of child nodes for a node are 26, 1 for each letter in the alphabet
   };
-
-  // Variables
-  TrieNode *root; // Root of this trie
-  set<string> strie; // Set of strings that exist in our trie
 
   // Methods
   TrieNode *new_node(TrieNode *par, char val); // Creates and returns a new node
   TrieNode *find(TrieNode *cur, string s2find, int pos); // Finds the node where s2find ends
-  void dfs(TrieNode *cur, string s); // Just for debugging
+  void dfs(TrieNode *cur, string s, vector<string> &ans); // Just for debugging
 };
 
 #endif

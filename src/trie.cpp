@@ -23,13 +23,19 @@ trie::trie() {
   for(auto i = 0; i < 26; i++) {
     root->child[i] = NULL;
   }
+
+  n_words = 0;
 }
 
 size_t trie::size() {
-  return strie.size();
+  return n_words;
 }
 
 void trie::insert(string s2add) { // O(n) on the length of the longest string
+  if(find(s2add)) return; // If s2add is already in our trie, do nothing
+
+  n_words++; // If s2add is a new word, increment the number of words in our trie
+
   auto cur = root;
   for(auto i = 0; i < s2add.length(); i++) {
     int letter = s2add[i] - 'a';
@@ -42,10 +48,9 @@ void trie::insert(string s2add) { // O(n) on the length of the longest string
   }
 
   cur->isLeaf = true;
-  strie.insert(s2add); // Insert our string in our map, this takes O(log(n)), on the number of strings we have in our set
 }
 
-trie::TrieNode *trie::new_node(TrieNode *par, char val) {
+typename trie::TrieNode *trie::new_node(TrieNode *par, char val) {
   TrieNode *next = new TrieNode();
   next->parent = par;
   next->value = val;
@@ -61,15 +66,29 @@ trie::TrieNode *trie::new_node(TrieNode *par, char val) {
   return next;
 }
 
+bool trie::find(string s2find) {
+  if(!occurs(s2find)) return false; // If s2find is not a prefix in our trie, it is not a word for sure
+  TrieNode *leaf = find(root, s2find, 0);
+
+  if(!leaf->isLeaf) return false;
+
+  return true;
+}
+
 void trie::erase(string s2rem) {
-  if(strie.find(s2rem) == strie.end()) return;
+  if(!find(s2rem)) return; // If leaf node is not a leaf, it means that s2rem is only a prefix, not a word
 
   TrieNode *leaf = find(root, s2rem, 0);
 
+  n_words--;
+
+  if(leaf->nchild > 0) { // If the node has any child, just mark it as non leaf
+    leaf->isLeaf = false;
+    return;
+  }
+
   for(int i = (int)s2rem.length() - 1; i >= 0; i--) {
     if(leaf->nchild > 0) { // If the node has any child, just mark it as non leaf
-      leaf->isLeaf = false;
-      strie.erase(s2rem);
       return;
     }
 
@@ -79,24 +98,22 @@ void trie::erase(string s2rem) {
     par->nchild--;
     leaf = par;
   }
-
-  strie.erase(s2rem);
 }
 
-trie::TrieNode *trie::find(TrieNode *cur, string s2find, int pos) {
-  if(pos == s2find.length()) {
+typename trie::TrieNode *trie::find(TrieNode *cur, string s2find, int pos) {
+  if(pos == s2find.length()) { // If we find the leaf node, return it
     return cur;
+  }
+
+  if(cur->child[s2find[pos] - 'a'] == NULL) { // If we find a node that has no child nodes while reading word s2find, s2find is not in our trie
+    return NULL;
   }
 
   return find(cur->child[s2find[pos] - 'a'], s2find, pos + 1);
 }
 
 bool trie::occurs(string pref) {
-  TrieNode *cur = root;
-  for(auto i = 0; i < pref.length(); i++) {
-    if(cur->child[pref[i] - 'a'] == NULL) return false;
-    cur = cur->child[pref[i] - 'a'];
-  }
+  if(find(root, pref, 0) == NULL) return false;
 
   return true;
 }
@@ -104,14 +121,12 @@ bool trie::occurs(string pref) {
 vector<string> trie::allWords() {
   vector<string> ans; // Resulting vector with all strings
 
-  for(auto it = strie.begin(); it != strie.end(); it++) {
-    ans.push_back(*it);
-  }
+  dfs(root, "", ans);
 
   return ans;
 }
 
-string trie::lcp() {
+string trie::lcp(string beg) {
   TrieNode *cur = root;
   string ans = ""; // Resulting lcp
 
@@ -132,19 +147,21 @@ string trie::lcp() {
 
 // Just for debugging
 void trie::debug() {
-  dfs(root, "");
+  vector<string> ans;
+  dfs(root, "", ans);
 }
 
 // Just for debugging
-void trie::dfs(TrieNode *cur, string s) {
+void trie::dfs(TrieNode *cur, string s, vector<string> &ans) {
   if(cur->isLeaf) {
-    cout << "Word " << s << " is in our trie." << endl;
+    //cout << "Word " << s << " is in our trie." << endl;
+    ans.push_back(s);
   }
   for(auto i = 0; i < 26; i++) {
     if(cur->child[i] != NULL) {
       char c = 'a' + i;
-      cout << "Visiting " << c << endl;
-      dfs(cur->child[i], s + c);
+      //cout << "Visiting " << c << endl;
+      dfs(cur->child[i], s + c, ans);
     }
   }
 }
