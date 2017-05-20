@@ -17,7 +17,7 @@ using namespace std;
 int main() {
   AVL<int> myavl = AVL<int>();
 
-  myavl.insert(3);
+  /*myavl.insert(3);
   //myavl.debug();
   //myavl.parDebug();
   myavl.insert(1);
@@ -44,6 +44,24 @@ int main() {
   myavl.insert(10);
   //myavl.debug();
   //myavl.parDebug();
+
+  myavl.debug();
+  myavl.remove(5);
+  myavl.debug();*/
+
+  myavl.insert(44);
+  myavl.insert(17);
+  myavl.insert(62);
+  myavl.insert(32);
+  myavl.insert(50);
+  myavl.insert(78);
+  myavl.insert(48);
+  myavl.insert(54);
+  myavl.insert(88);
+  myavl.remove(32);
+  myavl.remove(17);
+  myavl.remove(48);
+  //myavl.debug();
 
   cout << "Min value: " << myavl.minValue() << endl;
   cout << "Max value: " << myavl.maxValue() << endl;

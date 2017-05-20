@@ -30,6 +30,7 @@ public:
   void parDebug(); // Function that prints the parents
   size_t size(); // Function that returns the size of the AVL tree
   bool find(T val); // Returns true if val is in AVL - If iterator ends up being implemented, change this
+  void remove(T val); // Removes val from AVL
 
 private:
   struct Node;
@@ -55,11 +56,14 @@ private:
   Node *new_node(T val); // Create a new node with parent par and value val
   Node *insertBST(T val); // Insert val in AVL tree like one usually does in a Binary Search Tree
   void printPreOrder(Node *cur); // Function for debug, prints AVL in pre order
-  void balanceAVL(Node *cur); // Function for rebalancing the AVL tree
+  void balanceAVL(Node *cur, bool rem = false); // Function for rebalancing the AVL tree. If rem = true, then we are balancing after removal
   int height_diff(Node *cur); // Function for the difference between the heights of the children of node cur
   void rotate(Node *cur); // Function that performs the rotation in case one needs to rotate the tree
   void parPrint(Node *cur); // Function that prints the parents
   bool find(Node *cur, T val); // returns true if val is in AVL
+  Node *findNode(Node *cur, T val);
+  void removeBST(Node *cur); // Removes the val from AVL tree like one usually does in a Binary Search Tree
+  void transplant(Node *u, Node *v); // Transplants v into u's position
 };
 
 #endif
