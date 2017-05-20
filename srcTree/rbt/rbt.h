@@ -46,7 +46,7 @@ public:
   //void parDebug(); // Function that prints the parents
   size_t size(); // Function that returns the size of the Red-Black tree
   bool find(T val); // Returns true if val is in Red-Black tree - If iterator ends up being implemented, change this
-  //void remove(T val); // Removes val from Red-Black tree
+  void erase(T val); // Removes val from Red-Black tree
 
 private:
   struct Node;
@@ -74,6 +74,8 @@ private:
   string printColor(Node *cur);
   bool find(Node *cur, T val); // Returns true if val is in Red-Black tree
   void insertFixup(Node *cur); // Fixes colors after inserting a new node
+  void transplant(Node *u, Node* v); // Transplants v into u's position
+  Node *findNode(Node *cur, T val); // Find node with value val
 };
 
 #endif

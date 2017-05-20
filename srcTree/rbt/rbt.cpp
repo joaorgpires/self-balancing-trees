@@ -196,3 +196,68 @@ template<class T>
 size_t RBT<T>::size() {
   return size_of_tree;
 }
+
+template<class T>
+void RBT<T>::erase(T val) {
+  // Ref: Introduction to Algorithms, CLRS
+  if(!find(val)) return; // If val is not in in Red-Black tree, return
+
+  size_of_tree--;
+
+  Node *cur = findNode(root, val);
+  Node *next;
+  Color cur_or_color = cur->col;
+
+  if(cur->left == nullptr) {
+    // Cur has no left child
+    next = cur->right;
+    transplant(cur, cur->right);
+  }
+  else if(cur->right == nullptr) {
+    // Cur has no right child
+    next = cur->left;
+    transplant(cur, cur->left);
+  }
+  else {
+    // Cur has two children
+    Node *y = cur->right;
+    while(y->left != nullptr) y = y->left; // Find minimum value from y
+    next = y->right;
+    cur_or_color = color(cur);
+
+    if(y->par == cur) {
+      if(next != nullptr) next->par = y;
+    }
+    else {
+      transplant(y, y->right);
+      y->right = cur->right;
+      y->right->par = y;
+    }
+
+    transplant(cur, y);
+    y->left = cur->left;
+    y->left->par = y;
+    y->col = color(cur);
+  }
+
+  if(cur_or_color == BLACK);
+
+  delete cur;
+}
+
+template<class T>
+void RBT<T>::transplant(Node *u, Node *v) {
+  // Ref: Introduction to Algorithms, CLRS
+  if(u->par == nullptr) root = v;
+  else if(u == u->par->left) u->par->left = v;
+  else u->par->right = v;
+
+  if(v != nullptr) v->par = u->par;
+}
+
+template<class T>
+typename RBT<T>::Node *RBT<T>::findNode(Node *cur, T val) {
+  if(eq(cur->val, val)) return cur; // If current node has the same val, return cur
+  if(l(cur->val, val)) return findNode(cur->right, val); // If val is greater than the current node's val, go right
+  return findNode(cur->left, val); // If val is less than the current node's val, go left
+}
