@@ -29,7 +29,8 @@ int AVL<T>::height(Node *cur) {
 
 template<class T>
 void AVL<T>::insert(T val) {
-  // Search if val is already in AVL tree
+  // Search if val is already in AVL tree. If it is, simply return
+  if(find(val)) return;
 
   // Increment the size of the AVL tree
   size_of_tree++;
