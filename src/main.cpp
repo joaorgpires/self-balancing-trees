@@ -32,7 +32,7 @@ int main() {
     cout << word << " is in our trie." << endl;
   }
 
-  t.erase("anaconda");
+  t.erase("antigo");
 
   words = t.allWords();
 

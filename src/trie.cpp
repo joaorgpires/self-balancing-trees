@@ -88,7 +88,7 @@ void trie::erase(string s2rem) {
   }
 
   for(int i = (int)s2rem.length() - 1; i >= 0; i--) {
-    if(leaf->nchild > 0) { // If the node has any child, just mark it as non leaf
+    if(leaf->nchild > 0) { // If the node has any child, just leave it as it is and return
       return;
     }
 
@@ -153,6 +153,7 @@ void trie::debug() {
 
 // Just for debugging
 void trie::dfs(TrieNode *cur, string s, vector<string> &ans) {
+  //cout << "Cur child: " << cur->nchild << endl;
   if(cur->isLeaf) {
     //cout << "Word " << s << " is in our trie." << endl;
     ans.push_back(s);
@@ -161,6 +162,7 @@ void trie::dfs(TrieNode *cur, string s, vector<string> &ans) {
     if(cur->child[i] != NULL) {
       char c = 'a' + i;
       //cout << "Visiting " << c << endl;
+      //cout << cur->child[i]->nchild << endl;
       dfs(cur->child[i], s + c, ans);
     }
   }
