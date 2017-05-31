@@ -13,6 +13,8 @@
 
 using namespace std;
 
+// ######################################################################
+
 template<class T>
 AVL<T>::AVL() {
   root = new Node();
@@ -20,12 +22,19 @@ AVL<T>::AVL() {
   size_of_tree = 0;
 }
 
-template<class T>
-int AVL<T>::height(Node *cur) {
-  if(cur == nullptr) return -1;
+// ######################################################################
 
-  return cur->height;
+template<class T>
+void AVL<T>::debug() {
+  cout << "START OF DEBUG" << endl;
+  cout << "Root: ";
+  if(root != nullptr) printPreOrder(root);
+  else cout << "Empty tree." << endl;
+
+  cout << "END OF DEBUG" << endl << endl;
 }
+
+// ######################################################################
 
 template<class T>
 void AVL<T>::insert(T val) {
@@ -46,6 +55,128 @@ void AVL<T>::insert(T val) {
   balanceAVL(next);
 }
 
+// ######################################################################
+
+template<class T>
+bool AVL<T>::empty() {
+  return size_of_tree == 0;
+}
+
+// ######################################################################
+
+template<class T>
+void AVL<T>::erase(T val) {
+  cout << val << endl;
+  if(!find(val)) return;
+
+  size_of_tree--;
+
+  Node *r = findNode(root, val);
+
+  // Root case
+  if(r == root) {
+    // If left or right is nullptr, we know that there is no need to rebalance.
+    if(r->left == nullptr) transplant(r, r->right);
+    else if(r->right == nullptr) transplant(r, r->left);
+    else {
+      Node *y = r->right;
+      while(y->left != nullptr) y = y->left; // Find minimum value from y
+      Node *parent;
+      if(y->par != r) {
+        parent = y->par;
+        transplant(y, y->right);
+        y->right = r->right;
+        y->right->par = y;
+        y->right->height = max(height(y->right->left), height(y->right->right)) + 1;
+      }
+      else {
+        if(y->left == nullptr && y->right == nullptr) {
+          transplant(r, y);
+          y->left = r->left;
+          y->left->par = y;
+          y->left->height = max(height(y->left->left), height(y->left->right)) + 1;
+
+          if(y->right != nullptr && height_diff(y->right) > 1) {
+            rotate(y->right);
+          }
+          y->height = max(height(y->left), height(y->right)) + 1;
+
+          balanceAVL(root->left);
+
+          return;
+        }
+        parent = y;
+      }
+      transplant(r, y);
+      y->left = r->left;
+      y->left->par = y;
+      y->left->height = max(height(y->left->left), height(y->left->right)) + 1;
+
+      if(y->right != nullptr && height_diff(y->right) > 1) {
+        rotate(y->right);
+      }
+      y->height = max(height(y->left), height(y->right)) + 1;
+
+      balanceAVL(parent, true);
+    }
+
+    delete r;
+    return;
+  }
+
+  Node *par = r->par;
+
+  eraseBST(r);
+  par->height = max(height(par->left), height(par->right)) + 1;
+  balanceAVL(par, true);
+}
+
+// ######################################################################
+
+template<class T>
+bool AVL<T>::find(T val) {
+  return find(root, val);
+}
+
+// ######################################################################
+
+template<class T>
+T AVL<T>::maxValue() {
+  Node *cur = root;
+  while(cur->right != nullptr) cur = cur->right; // The max value in an AVL tree is the rightmost leaf
+
+  return cur->val;
+}
+
+// ######################################################################
+
+template<class T>
+T AVL<T>::minValue() {
+  Node *cur = root;
+  while(cur->left != nullptr) cur = cur->left; // The min value in an AVL tree is the leftmost leaf
+
+  return cur->val;
+}
+
+// ######################################################################
+
+template<class T>
+void AVL<T>::parDebug() {
+  cout << "-------PARENT DEBUG-------" << endl;
+  parPrint(root->left);
+  parPrint(root->right);
+  cout << "-------END OF PARENT DEBUG-------" << endl << endl;
+}
+
+// ######################################################################
+
+template<class T>
+size_t AVL<T>::size() {
+  return size_of_tree;
+}
+
+// ######################################################################
+
 template<class T>
 void AVL<T>::addRoot(T val) {
   Node *next = new_node(val);
@@ -55,17 +186,90 @@ void AVL<T>::addRoot(T val) {
   root = next;
 }
 
+// ######################################################################
+
 template<class T>
-typename AVL<T>::Node *AVL<T>::new_node(T val) {
-  Node *next = new Node();
+void AVL<T>::balanceAVL(Node *cur, bool rem) {
+  //cout << "Balancing after inserting " << cur->val << endl;
+  while(cur->par != nullptr) {
+    if(rem) cur->par->height = max(height(cur->par->left), height(cur->par->right)) + 1;
+    else cur->par->height = max(height(cur->par), height(cur) + 1);
+    //cout << cur->par->val << " " << height_diff(cur->par) << endl;
+    if(height_diff(cur->par) > 1) {
+      rotate(cur->par);
+      if(!rem) return; // If we are inserting, we can stop recursion to root
+    }
 
-  next->val = val;
-  next->left = nullptr;
-  next->right = nullptr;
-  next->height = 0;
-
-  return next;
+    cur = cur->par;
+  }
 }
+
+// ######################################################################
+
+template<class T>
+void AVL<T>::eraseBST(Node *cur) {
+  // Ref: Introduction to Algorithms, CLRS
+  if(cur->left == nullptr) transplant(cur, cur->right);
+  else if(cur->right == nullptr) transplant(cur, cur->left);
+  else { // Balance if we have problems with y->right children
+    Node *y = cur->right;
+    while(y->left != nullptr) y = y->left; // Find minimum value from y
+    if(y->par != cur) {
+      transplant(y, y->right);
+      y->right = cur->right;
+      y->right->par = y;
+      y->right->height = max(height(y->right->left), height(y->right->right)) + 1;
+    }
+    transplant(cur, y);
+    y->left = cur->left;
+    y->left->par = y;
+    y->left->height = max(height(y->left->left), height(y->left->right)) + 1;
+
+    if(y->right != nullptr && height_diff(y->right) > 1) {
+      rotate(y->right);
+    }
+    y->height = max(height(y->left), height(y->right)) + 1;
+  }
+
+  delete cur;
+}
+
+// ######################################################################
+
+template<class T>
+bool AVL<T>::find(Node *cur, T val) {
+  if(cur == nullptr) return false; // If we end up at a leaf node, val is not in AVL tree
+  if(eq(cur->val, val)) return true; // If current node has the same val, return true
+  if(l(cur->val, val)) return find(cur->right, val); // If val is greater than the current node's val, go right
+  return find(cur->left, val); // If val is less than the current node's val, go left
+}
+
+// ######################################################################
+
+template<class T>
+typename AVL<T>::Node *AVL<T>::findNode(Node *cur, T val) {
+  if(eq(cur->val, val)) return cur; // If current node has the same val, return cur
+  if(l(cur->val, val)) return findNode(cur->right, val); // If val is greater than the current node's val, go right
+  return findNode(cur->left, val); // If val is less than the current node's val, go left
+}
+
+// ######################################################################
+
+template<class T>
+int AVL<T>::height(Node *cur) {
+  if(cur == nullptr) return -1; // The height of a nullptr is -1 as defined
+
+  return cur->height;
+}
+
+// ######################################################################
+
+template<class T>
+int AVL<T>::height_diff(Node *cur){
+  return abs(height(cur->left) - height(cur->right));
+}
+
+// ######################################################################
 
 template<class T>
 typename AVL<T>::Node *AVL<T>::insertBST(T val) {
@@ -87,14 +291,32 @@ typename AVL<T>::Node *AVL<T>::insertBST(T val) {
   return next;
 }
 
-template<class T>
-void AVL<T>::debug() {
-  cout << "START OF DEBUG" << endl;
-  cout << "Root: ";
-  printPreOrder(root);
+// ######################################################################
 
-  cout << "END OF DEBUG" << endl << endl;
+template<class T>
+typename AVL<T>::Node *AVL<T>::new_node(T val) {
+  Node *next = new Node();
+
+  next->val = val;
+  next->left = nullptr;
+  next->right = nullptr;
+  next->height = 0;
+
+  return next;
 }
+
+// ######################################################################
+
+template<class T>
+void AVL<T>::parPrint(Node *cur) {
+  if(cur == nullptr) return;
+
+  cout << "Parent of " << cur->val << ": " << cur->par->val << endl;
+  parPrint(cur->left);
+  parPrint(cur->right);
+}
+
+// ######################################################################
 
 template<class T>
 void AVL<T>::printPreOrder(Node *cur) {
@@ -111,42 +333,7 @@ void AVL<T>::printPreOrder(Node *cur) {
   printPreOrder(cur->right);
 }
 
-template<class T>
-T AVL<T>::maxValue() {
-  Node *cur = root;
-  while(cur->right != nullptr) cur = cur->right; // The max value in an AVL tree is the rightmost leaf
-
-  return cur->val;
-}
-
-template<class T>
-T AVL<T>::minValue() {
-  Node *cur = root;
-  while(cur->left != nullptr) cur = cur->left; // The min value in an AVL tree is the leftmost leaf
-
-  return cur->val;
-}
-
-template<class T>
-void AVL<T>::balanceAVL(Node *cur, bool rem) {
-  //cout << "Balancing after inserting " << cur->val << endl;
-  while(cur->par != nullptr) {
-    if(rem) cur->par->height = max(height(cur->par->left), height(cur->par->right)) + 1;
-    else cur->par->height = max(height(cur->par), height(cur) + 1);
-    //cout << cur->par->val << " " << height_diff(cur->par) << endl;
-    if(height_diff(cur->par) > 1) {
-      rotate(cur->par);
-      if(!rem) return; // If we are inserting, we can stop recursion to root
-    }
-
-    cur = cur->par;
-  }
-}
-
-template<class T>
-int AVL<T>::height_diff(Node *cur){
-  return abs(height(cur->left) - height(cur->right));
-}
+// ######################################################################
 
 template<class T>
 void AVL<T>::rotate(Node *cur) {
@@ -287,98 +474,7 @@ void AVL<T>::rotate(Node *cur) {
   if(t4 != nullptr) t4->par = c;
 }
 
-template<class T>
-void AVL<T>::parDebug() {
-  cout << "-------PARENT DEBUG-------" << endl;
-  parPrint(root->left);
-  parPrint(root->right);
-  cout << "-------END OF PARENT DEBUG-------" << endl << endl;
-}
-
-template<class T>
-void AVL<T>::parPrint(Node *cur) {
-  if(cur == nullptr) return;
-
-  cout << "Parent of " << cur->val << ": " << cur->par->val << endl;
-  parPrint(cur->left);
-  parPrint(cur->right);
-}
-
-template<class T>
-size_t AVL<T>::size() {
-  return size_of_tree;
-}
-
-template<class T>
-bool AVL<T>::find(T val) {
-  return find(root, val);
-}
-
-template<class T>
-bool AVL<T>::find(Node *cur, T val) {
-  if(cur == nullptr) return false; // If we end up at a leaf node, val is not in AVL tree
-  if(eq(cur->val, val)) return true; // If current node has the same val, return true
-  if(l(cur->val, val)) return find(cur->right, val); // If val is greater than the current node's val, go right
-  return find(cur->left, val); // If val is less than the current node's val, go left
-}
-
-template<class T>
-void AVL<T>::remove(T val) {
-  if(!find(val)) return;
-
-  size_of_tree--;
-
-  Node *r = findNode(root, val);
-  bool left;
-  Node *par = r->par;
-  (r == par->left) ? left = true : left = false;
-  removeBST(r);
-
-  if(par == nullptr) {
-    root->height = max(height(root->left), height(root->right)) + 1;
-    if(left) balanceAVL(root->left, true);
-    else balanceAVL(root->right, true);
-  }
-  else {
-    par->height = max(height(par->left), height(par->right)) + 1;
-    balanceAVL(par, true);
-  }
-}
-
-template<class T>
-typename AVL<T>::Node *AVL<T>::findNode(Node *cur, T val) {
-  if(eq(cur->val, val)) return cur; // If current node has the same val, return cur
-  if(l(cur->val, val)) return findNode(cur->right, val); // If val is greater than the current node's val, go right
-  return findNode(cur->left, val); // If val is less than the current node's val, go left
-}
-
-template<class T>
-void AVL<T>::removeBST(Node *cur) {
-  // Ref: Introduction to Algorithms, CLRS
-  if(cur->left == nullptr) transplant(cur, cur->right);
-  else if(cur->right == nullptr) transplant(cur, cur->left);
-  else { // Balance if we have problems with y->right children
-    Node *y = cur->right;
-    while(y->left != nullptr) y = y->left;
-    if(y->par != cur) {
-      transplant(y, y->right);
-      y->right = cur->right;
-      y->right->par = y;
-      y->right->height = max(height(y->right->left), height(y->right->right)) + 1;
-    }
-    transplant(cur, y);
-    y->left = cur->left;
-    y->left->par = y;
-    y->left->height = max(height(y->left->left), height(y->left->right)) + 1;
-
-    if(y->right != nullptr && height_diff(y->right) > 1) {
-      rotate(y->right);
-    }
-    y->height = max(height(y->left), height(y->right)) + 1;
-  }
-
-  delete cur;
-}
+// ######################################################################
 
 template<class T>
 void AVL<T>::transplant(Node *u, Node *v) {
@@ -389,3 +485,5 @@ void AVL<T>::transplant(Node *u, Node *v) {
 
   if(v != nullptr) v->par = u->par;
 }
+
+// ######################################################################

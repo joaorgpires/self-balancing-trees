@@ -11,63 +11,46 @@
 #include <iostream>
 #include "avl.h"
 #include "avl.cpp" // clang++ will not compile without this
+#include <ctime> // Library for time tests
+#include <vector>
 
 using namespace std;
 
+AVL<int> avl = AVL<int>();
+vector<int> v;
+
 int main() {
-  AVL<int> myavl = AVL<int>();
+  clock_t fst, snd;
+  int n; cin >> n;
+  double tm;
 
-  /*myavl.insert(3);
-  //myavl.debug();
-  //myavl.parDebug();
-  myavl.insert(1);
-  //myavl.debug();
-  //myavl.parDebug();
-  myavl.insert(5);
-  //myavl.debug();
-  //myavl.parDebug();
-  myavl.insert(7);
-  //myavl.debug();
-  //myavl.parDebug();
-  myavl.insert(8);
-  //myavl.debug();
-  //myavl.parDebug();
-  myavl.insert(6);
-  //myavl.debug();
-  //myavl.parDebug();
-  myavl.insert(2);
-  //myavl.debug();
-  //myavl.parDebug();
-  myavl.insert(9);
-  //myavl.debug();
-  //myavl.parDebug();
-  myavl.insert(10);
-  //myavl.debug();
-  //myavl.parDebug();
+  fst = clock();
+  for(int i = 0; i < n; i++) {
+    int k; cin >> k;
+    v.push_back(k);
+    avl.insert(k);
+  }
+  snd = clock();
 
-  myavl.debug();
-  myavl.remove(5);
-  myavl.debug();*/
+  tm = 1000.0 * (snd - fst) / CLOCKS_PER_SEC;
 
-  myavl.insert(44);
-  myavl.insert(17);
-  myavl.insert(62);
-  myavl.insert(32);
-  myavl.insert(50);
-  myavl.insert(78);
-  myavl.insert(48);
-  myavl.insert(54);
-  myavl.insert(88);
-  myavl.remove(32);
-  myavl.remove(17);
-  myavl.remove(48);
-  //myavl.debug();
+  cout << "Insertion: " << tm << " milliseconds." << endl;
 
-  cout << "Min value: " << myavl.minValue() << endl;
-  cout << "Max value: " << myavl.maxValue() << endl;
-  cout << "Size of the AVL tree: " << myavl.size() << endl;
-  if(myavl.find(2)) cout << "2 is in AVL tree." << endl;
-  if(!myavl.find(11)) cout << "11 is not in AVL tree." << endl;
+  fst = clock();
+  cout << "Minimum value: " << avl.minValue() << endl;
+  snd = clock();
+
+  tm = 1000.0 * (snd - fst) / CLOCKS_PER_SEC;
+
+  cout << "Minimum: " << tm << " milliseconds." << endl;
+
+  fst = clock();
+  cout << "Maximum value: " << avl.maxValue() << endl;
+  snd = clock();
+
+  tm = 1000.0 * (snd - fst) / CLOCKS_PER_SEC;
+
+  cout << "Maximum: " << tm << " milliseconds." << endl;
 
   return 0;
 }

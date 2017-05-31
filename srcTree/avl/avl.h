@@ -23,14 +23,15 @@ public:
 
   // Methods
   AVL(); // Construct method for AVL tree
-  void insert(T val); // Insert an element in AVL tree
   void debug(); // Function called or debugging
+  void insert(T val); // Insert an element in AVL tree
+  bool empty(); // Returns true if tree is empty
+  void erase(T val); // Removes val from AVL
+  bool find(T val); // Returns true if val is in AVL - If iterator ends up being implemented, change this
   T maxValue(); // Function that returns the maximum value in AVL tree
   T minValue(); // Function that returns the minimum value in AVL tree
   void parDebug(); // Function that prints the parents
   size_t size(); // Function that returns the size of the AVL tree
-  bool find(T val); // Returns true if val is in AVL - If iterator ends up being implemented, change this
-  void remove(T val); // Removes val from AVL
 
 private:
   struct Node;
@@ -51,18 +52,18 @@ private:
   };
 
   // Methods
-  int height(Node *cur); // Get the height of Node cur
   void addRoot(T val); // Add root to this AVL tree
-  Node *new_node(T val); // Create a new node with parent par and value val
-  Node *insertBST(T val); // Insert val in AVL tree like one usually does in a Binary Search Tree
-  void printPreOrder(Node *cur); // Function for debug, prints AVL in pre order
   void balanceAVL(Node *cur, bool rem = false); // Function for rebalancing the AVL tree. If rem = true, then we are balancing after removal
-  int height_diff(Node *cur); // Function for the difference between the heights of the children of node cur
-  void rotate(Node *cur); // Function that performs the rotation in case one needs to rotate the tree
-  void parPrint(Node *cur); // Function that prints the parents
+  void eraseBST(Node *cur); // Removes the val from AVL tree like one usually does in a Binary Search Tree
   bool find(Node *cur, T val); // returns true if val is in AVL
   Node *findNode(Node *cur, T val);
-  void removeBST(Node *cur); // Removes the val from AVL tree like one usually does in a Binary Search Tree
+  int height(Node *cur); // Get the height of Node cur
+  int height_diff(Node *cur); // Function for the difference between the heights of the children of node cur
+  Node *insertBST(T val); // Insert val in AVL tree like one usually does in a Binary Search Tree
+  Node *new_node(T val); // Create a new node with parent par and value val
+  void parPrint(Node *cur); // Function that prints the parents
+  void printPreOrder(Node *cur); // Function for debug, prints AVL in pre order
+  void rotate(Node *cur); // Function that performs the rotation in case one needs to rotate the tree
   void transplant(Node *u, Node *v); // Transplants v into u's position
 };
 
